@@ -77,6 +77,9 @@ class DQNAgent:
         self.online_net.train(was_training)
         return values
 
+    def state_value(self, state: np.ndarray) -> float:
+        return float(self.q_values(state).max().item())
+
     def select_action(self, state: np.ndarray, epsilon: float) -> ActionSelection:
         if not 0.0 <= epsilon <= 1.0:
             raise ValueError("epsilon must be between 0 and 1")
