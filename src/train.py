@@ -19,6 +19,19 @@ def epsilon_by_step(step: int, config: BaseConfig) -> float:
     )
 
 
+def save_checkpoint(path: Path, agent: DQNAgent, config: BaseConfig, summary: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "online_net": agent.online_net.state_dict(),
+            "target_net": agent.target_net.state_dict(),
+            "config": asdict(config),
+            "summary": summary,
+        },
+        path,
+    )
+
+
 def save_rows(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
@@ -128,6 +141,7 @@ def main() -> None:
     output_dir = Path("results") / config.experiment_name / f"seed_{config.seed}"
     save_rows(output_dir / "episodes.csv", episode_rows)
     save_rows(output_dir / "summary.csv", [summary])
+            save_checkpoint(output_dir / "checkpoint.pt", agent, config, summary)
 
     print("Standard DQN training completed")
     print("Output directory:", output_dir)
