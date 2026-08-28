@@ -175,17 +175,6 @@ def main() -> None:
     experiment_name = args.name or "dynamic_condition"
     output_dir = Path("results") / experiment_name / f"seed_{config.seed}"
     save_rows(output_dir / "episodes.csv", episode_rows)
-    checkpoint = {
-        "online_net": agent.online_net.state_dict(),
-        "target_net": agent.target_net.state_dict(),
-        "optimizer": agent.optimizer.state_dict(),
-        "env_step": config.total_env_steps,
-        "gradient_steps": summary["gradient_steps"],
-        "seed": config.seed,
-        "config": asdict(config),
-    }
-    output_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(checkpoint, output_dir / "checkpoint_final.pt")
     save_rows(output_dir / "summary.csv", [summary])
 
     print("Dynamic-condition DQN training completed")
