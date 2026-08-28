@@ -19,6 +19,19 @@ def epsilon_by_step(step: int, config: BaseConfig) -> float:
     )
 
 
+def save_checkpoint(path: Path, agent: DQNAgent, config: BaseConfig, summary: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "online_net": agent.online_net.state_dict(),
+            "target_net": agent.target_net.state_dict(),
+            "config": asdict(config),
+            "summary": summary,
+        },
+        path,
+    )
+
+
 def save_rows(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
@@ -29,7 +42,7 @@ def save_rows(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict]:
+def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
     set_global_seed(config.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     env = make_env(config.env_id, config.seed)
@@ -103,7 +116,7 @@ def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict]:
         "device": str(device),
         **asdict(config),
     }
-    return episode_rows, summary
+    return episode_rows, summary,agent
 
 
 def parse_args() -> argparse.Namespace:
@@ -124,10 +137,11 @@ def main() -> None:
     if args.name is not None:
         config = replace(config, experiment_name=args.name)
 
-    episode_rows, summary = train_standard_dqn(config)
+    episode_rows, summary,agent = train_standard_dqn(config)
     output_dir = Path("results") / config.experiment_name / f"seed_{config.seed}"
     save_rows(output_dir / "episodes.csv", episode_rows)
     save_rows(output_dir / "summary.csv", [summary])
+    save_checkpoint(output_dir / "checkpoint.pt", agent, config,summary)
 
     print("Standard DQN training completed")
     print("Output directory:", output_dir)

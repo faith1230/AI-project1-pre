@@ -13,6 +13,19 @@ from src.train import epsilon_by_step
 from src.utils import set_global_seed
 
 
+def save_checkpoint(path: Path, agent: DQNAgent, config: BaseConfig, summary: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "online_net": agent.online_net.state_dict(),
+            "target_net": agent.target_net.state_dict(),
+            "config": asdict(config),
+            "summary": summary,
+        },
+        path,
+    )
+
+
 def save_rows(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
@@ -25,7 +38,7 @@ def save_rows(path: Path, rows: list[dict]) -> None:
 
 def train_fixed_frequency(
     config: BaseConfig, update_interval: int
-) -> tuple[list[dict], dict]:
+) -> tuple[list[dict], dict,DQNAgent]:
     if update_interval <= 0:
         raise ValueError("update_interval must be positive")
 
@@ -113,7 +126,7 @@ def train_fixed_frequency(
         "device": str(device),
         **asdict(config),
     }
-    return episode_rows, summary
+    return episode_rows, summary,agent
 
 
 def parse_args() -> argparse.Namespace:
@@ -135,12 +148,13 @@ def main() -> None:
     if args.name is not None:
         config = replace(config, experiment_name=args.name)
 
-    episode_rows, summary = train_fixed_frequency(config, args.interval)
+    episode_rows, summary ,agent= train_fixed_frequency(config, args.interval)
     default_name = f"fixed_frequency_{args.interval}"
     experiment_name = args.name or default_name
     output_dir = Path("results") / experiment_name / f"seed_{config.seed}"
     save_rows(output_dir / "episodes.csv", episode_rows)
     save_rows(output_dir / "summary.csv", [summary])
+    save_checkpoint(output_dir / "checkpoint.pt", agent, config, summary)
 
     print("Fixed-frequency DQN training completed")
     print("Update interval:", args.interval)

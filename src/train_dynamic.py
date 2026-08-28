@@ -19,7 +19,17 @@ def dynamic_update_condition(
 ) -> bool:
     return bool(np.sign(value) * (last_value - (reward + value)) >= 0.0)
 
-
+def save_checkpoint(path: Path, agent: DQNAgent, config: BaseConfig, summary: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save(
+        {
+            "online_net": agent.online_net.state_dict(),
+            "target_net": agent.target_net.state_dict(),
+            "config": asdict(config),
+            "summary": summary,
+        },
+        path,
+    )
 def save_rows(path: Path, rows: list[dict]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     if not rows:
@@ -30,7 +40,7 @@ def save_rows(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def train_dynamic_dqn(config: BaseConfig) -> tuple[list[dict], dict]:
+def train_dynamic_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
     set_global_seed(config.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     env = make_env(config.env_id, config.seed)
@@ -131,7 +141,12 @@ def train_dynamic_dqn(config: BaseConfig) -> tuple[list[dict], dict]:
             episode_greedy_actions = 0
             episode_exploratory_actions = 0
             episode_condition_triggers = 0
-
+    if len(buffer) >= config.learning_starts and steps_since_update > 0:
+        for _ in range(steps_since_update):
+            metrics = agent.gradient_update(buffer.sample(config.batch_size))
+            gradient_steps += 1
+            latest_loss = metrics.loss
+    steps_since_update = 0
     env.close()
     summary = {
         "method": "dynamic_condition",
@@ -150,7 +165,7 @@ def train_dynamic_dqn(config: BaseConfig) -> tuple[list[dict], dict]:
         "device": str(device),
         **asdict(config),
     }
-    return episode_rows, summary
+    return episode_rows, summary,agent
 
 
 def parse_args() -> argparse.Namespace:
@@ -171,12 +186,12 @@ def main() -> None:
     if args.name is not None:
         config = replace(config, experiment_name=args.name)
 
-    episode_rows, summary = train_dynamic_dqn(config)
+    episode_rows, summary,agent = train_dynamic_dqn(config)
     experiment_name = args.name or "dynamic_condition"
     output_dir = Path("results") / experiment_name / f"seed_{config.seed}"
     save_rows(output_dir / "episodes.csv", episode_rows)
     save_rows(output_dir / "summary.csv", [summary])
-
+    save_checkpoint(output_dir / "checkpoint.pt", agent, config, summary)
     print("Dynamic-condition DQN training completed")
     print("Output directory:", output_dir)
     print("Completed episodes:", summary["completed_episodes"])
