@@ -11,6 +11,7 @@ from src.environment import describe_env, make_env
 from src.replay_buffer import ReplayBuffer
 from src.utils import set_global_seed
 
+from src.train_monitor import TrainingMonitor, TrainingSnapshot
 
 def epsilon_by_step(step: int, config: BaseConfig) -> float:
     fraction = min(step / config.epsilon_decay_steps, 1.0)
@@ -58,7 +59,8 @@ def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
         device=device,
     )
     buffer = ReplayBuffer(config.replay_capacity, seed=config.seed)
-
+    mean_q_value = None
+    mean_target = None
     episode_rows = []
     state, _ = env.reset(seed=config.seed)
     episode_return = 0.0
@@ -66,45 +68,87 @@ def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
     episode_index = 0
     gradient_steps = 0
     latest_loss = None
-
-    for env_step in range(1, config.total_env_steps + 1):
-        epsilon = epsilon_by_step(env_step - 1, config)
-        selection = agent.select_action(state, epsilon)
-        next_state, reward, terminated, truncated, _ = env.step(selection.action)
-        buffer.push(
-            state, selection.action, reward, next_state, terminated, truncated
-        )
-        state = next_state
-        episode_return += reward
-        episode_length += 1
-
-        if len(buffer) >= config.learning_starts:
-            batch = buffer.sample(config.batch_size)
-            metrics = agent.gradient_update(batch)
-            gradient_steps += 1
-            latest_loss = metrics.loss
-
-        if env_step % config.target_sync_interval == 0:
-            agent.sync_target_network()
-
-        if terminated or truncated:
-            episode_index += 1
-            episode_rows.append(
-                {
-                    "episode": episode_index,
-                    "env_step": env_step,
-                    "return": episode_return,
-                    "length": episode_length,
-                    "success": int(terminated),
-                    "epsilon": epsilon,
-                    "gradient_steps_so_far": gradient_steps,
-                    "latest_loss": latest_loss,
-                }
+    with TrainingMonitor(
+        total_env_steps=config.total_env_steps,
+        experiment_name=config.experiment_name,
+        device=str(device),
+        update_every_steps=50,
+    ) as monitor:
+        for env_step in range(1, config.total_env_steps + 1):
+            epsilon = epsilon_by_step(env_step - 1, config)
+            selection = agent.select_action(state, epsilon)
+            next_state, reward, terminated, truncated, _ = env.step(selection.action)
+            buffer.push(
+                state, selection.action, reward, next_state, terminated, truncated
             )
-            state, _ = env.reset(seed=config.seed + episode_index)
-            episode_return = 0.0
-            episode_length = 0
+            state = next_state
+            episode_return += reward
+            episode_length += 1
 
+            if len(buffer) >= config.learning_starts:
+                batch = buffer.sample(config.batch_size)
+                metrics = agent.gradient_update(batch)
+                gradient_steps += 1
+                latest_loss = metrics.loss
+                mean_q_value = metrics.mean_q_value
+                mean_target = metrics.mean_target
+
+            if env_step % config.target_sync_interval == 0:
+                agent.sync_target_network()
+
+            if terminated or truncated:
+                episode_index += 1
+                episode_rows.append(
+                    {
+                        "episode": episode_index,
+                        "env_step": env_step,
+                        "return": episode_return,
+                        "length": episode_length,
+                        "success": int(terminated),
+                        "epsilon": epsilon,
+                        "gradient_steps_so_far": gradient_steps,
+                        "latest_loss": latest_loss,
+                    }
+                )
+                state, _ = env.reset(seed=config.seed + episode_index)
+                episode_return = 0.0
+                episode_length = 0
+                monitor.update(
+    TrainingSnapshot(
+        env_step=env_step,
+        total_env_steps=config.total_env_steps,
+        episode=episode_index + 1,
+        episode_return=episode_return,
+        episode_length=episode_length,
+        epsilon=epsilon,
+        replay_size=len(buffer),
+        replay_capacity=config.replay_capacity,
+        gradient_steps=gradient_steps,
+        latest_loss=latest_loss,
+        mean_q_value=mean_q_value,
+        mean_target=mean_target,
+    )
+)
+            monitor.update(
+    TrainingSnapshot(
+        env_step=config.total_env_steps,
+        total_env_steps=config.total_env_steps,
+        episode=episode_index + 1,
+        episode_return=episode_return,
+        episode_length=episode_length,
+        epsilon=epsilon_by_step(
+            config.total_env_steps - 1,
+            config,
+        ),
+        replay_size=len(buffer),
+        replay_capacity=config.replay_capacity,
+        gradient_steps=gradient_steps,
+        latest_loss=latest_loss,
+        mean_q_value=mean_q_value,
+        mean_target=mean_target,
+    ),
+    force=True,
+)
     env.close()
     summary = {
         "method": config.experiment_name,
