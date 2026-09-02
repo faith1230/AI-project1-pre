@@ -1,0 +1,2 @@
+checkpoint,evaluation_episodes,evaluation_seed_start,mean_return,std_return,median_return,success_rate,mean_episode_length,mean_length_when_successful
+results\dynamic__dqn\seed_42\checkpoint.pt,100,10000,-169.93,13.197991123537316,-172.0,0.99,169.93,169.62626262626262

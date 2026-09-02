@@ -111,44 +111,25 @@ def train_standard_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
                     }
                 )
                 state, _ = env.reset(seed=config.seed + episode_index)
+                monitor.update(
+                    TrainingSnapshot(
+                        env_step=env_step,
+                        total_env_steps=config.total_env_steps,
+                        episode=episode_index + 1,
+                        episode_return=episode_return,
+                        episode_length=episode_length,
+                        epsilon=epsilon,
+                        replay_size=len(buffer),
+                        replay_capacity=config.replay_capacity,
+                        gradient_steps=gradient_steps,
+                        latest_loss=latest_loss,
+                        mean_q_value=mean_q_value,
+                        mean_target=mean_target,
+                    )
+                )
                 episode_return = 0.0
                 episode_length = 0
-                monitor.update(
-    TrainingSnapshot(
-        env_step=env_step,
-        total_env_steps=config.total_env_steps,
-        episode=episode_index + 1,
-        episode_return=episode_return,
-        episode_length=episode_length,
-        epsilon=epsilon,
-        replay_size=len(buffer),
-        replay_capacity=config.replay_capacity,
-        gradient_steps=gradient_steps,
-        latest_loss=latest_loss,
-        mean_q_value=mean_q_value,
-        mean_target=mean_target,
-    )
-)
-            monitor.update(
-    TrainingSnapshot(
-        env_step=config.total_env_steps,
-        total_env_steps=config.total_env_steps,
-        episode=episode_index + 1,
-        episode_return=episode_return,
-        episode_length=episode_length,
-        epsilon=epsilon_by_step(
-            config.total_env_steps - 1,
-            config,
-        ),
-        replay_size=len(buffer),
-        replay_capacity=config.replay_capacity,
-        gradient_steps=gradient_steps,
-        latest_loss=latest_loss,
-        mean_q_value=mean_q_value,
-        mean_target=mean_target,
-    ),
-    force=True,
-)
+                
     env.close()
     summary = {
         "method": config.experiment_name,

@@ -1,0 +1,2 @@
+method,seed,total_env_steps,update_interval,completed_episodes,gradient_steps,final_epsilon,device,env_id,experiment_name,replay_capacity,batch_size,learning_starts,hidden_dim,gamma,learning_rate,gradient_clip_norm,target_sync_interval,epsilon_start,epsilon_end,epsilon_decay_steps
+fixed_frequency_64,44,100000,64,500,98983,0.0050000000000000044,cuda,MountainCar-v0,fixed_dqn_64,50000,64,1000,64,0.99,0.001,10.0,100,1.0,0.005,50000

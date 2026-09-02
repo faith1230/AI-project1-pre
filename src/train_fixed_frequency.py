@@ -13,6 +13,7 @@ from src.train import epsilon_by_step
 from src.utils import set_global_seed
 
 
+from src.train_monitor import TrainingMonitor, TrainingSnapshot
 def save_checkpoint(path: Path, agent: DQNAgent, config: BaseConfig, summary: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save(
@@ -57,7 +58,8 @@ def train_fixed_frequency(
         device=device,
     )
     buffer = ReplayBuffer(config.replay_capacity, seed=config.seed)
-
+    mean_q_value = None
+    mean_target = None
     episode_rows = []
     state, _ = env.reset(seed=config.seed)
     episode_return = 0.0
@@ -66,54 +68,82 @@ def train_fixed_frequency(
     gradient_steps = 0
     steps_since_update = 0
     latest_loss = None
-
-    for env_step in range(1, config.total_env_steps + 1):
-        epsilon = epsilon_by_step(env_step - 1, config)
-        selection = agent.select_action(state, epsilon)
-        next_state, reward, terminated, truncated, _ = env.step(selection.action)
-        buffer.push(
-            state, selection.action, reward, next_state, terminated, truncated
-        )
-        state = next_state
-        episode_return += reward
-        episode_length += 1
-
-        if len(buffer) >= config.learning_starts:
-            steps_since_update += 1
-            episode_done = terminated or truncated
-            update_due = (
-                steps_since_update >= update_interval or episode_done
+    with TrainingMonitor(
+            total_env_steps=config.total_env_steps,
+            experiment_name=config.experiment_name,
+            device=str(device),
+            update_every_steps=50,
+         ) as monitor:
+        for env_step in range(1, config.total_env_steps + 1):
+            epsilon = epsilon_by_step(env_step - 1, config)
+            selection = agent.select_action(state, epsilon)
+            next_state, reward, terminated, truncated, _ = env.step(selection.action)
+            buffer.push(
+                state, selection.action, reward, next_state, terminated, truncated
             )
-            if update_due:
-                for _ in range(steps_since_update):
-                    metrics = agent.gradient_update(
-                        buffer.sample(config.batch_size)
-                    )
-                    gradient_steps += 1
-                    latest_loss = metrics.loss
-                steps_since_update = 0
+            state = next_state
+            episode_return += reward
+            episode_length += 1
 
-        if env_step % config.target_sync_interval == 0:
-            agent.sync_target_network()
+            if len(buffer) >= config.learning_starts:
+                steps_since_update += 1
+                episode_done = terminated or truncated
+                update_due = (
+                    steps_since_update >= update_interval or episode_done
+                )
+                if update_due:
+                    for _ in range(steps_since_update):
+                        metrics = agent.gradient_update(
+                            buffer.sample(config.batch_size)
+                        )
+                        gradient_steps += 1
+                        latest_loss = metrics.loss
+                        mean_q_value = metrics.mean_q_value
+                        mean_target = metrics.mean_target
+                    steps_since_update = 0
 
-        if terminated or truncated:
-            episode_index += 1
-            episode_rows.append(
-                {
-                    "episode": episode_index,
-                    "env_step": env_step,
-                    "return": episode_return,
-                    "length": episode_length,
-                    "success": int(terminated),
-                    "epsilon": epsilon,
-                    "gradient_steps_so_far": gradient_steps,
-                    "latest_loss": latest_loss,
-                }
-            )
-            state, _ = env.reset(seed=config.seed + episode_index)
-            episode_return = 0.0
-            episode_length = 0
+            if env_step % config.target_sync_interval == 0:
+                agent.sync_target_network()
 
+            if terminated or truncated:
+                episode_index += 1
+                episode_rows.append(
+                    {
+                        "episode": episode_index,
+                        "env_step": env_step,
+                        "return": episode_return,
+                        "length": episode_length,
+                        "success": int(terminated),
+                        "epsilon": epsilon,
+                        "gradient_steps_so_far": gradient_steps,
+                        "latest_loss": latest_loss,
+                    }
+                )
+                state, _ = env.reset(seed=config.seed + episode_index)
+                monitor.update(
+                                    TrainingSnapshot(
+                                        env_step=env_step,
+                                        total_env_steps=config.total_env_steps,
+                                        episode=episode_index + 1,
+                                        episode_return=episode_return,
+                                        episode_length=episode_length,
+                                        epsilon=epsilon,
+                                        replay_size=len(buffer),
+                                        replay_capacity=config.replay_capacity,
+                                        gradient_steps=gradient_steps,
+                                        latest_loss=latest_loss,
+                                        mean_q_value=mean_q_value,
+                                        mean_target=mean_target,
+                                    )
+                                )
+                episode_return = 0.0
+                episode_length = 0
+    if len(buffer) >= config.learning_starts and steps_since_update > 0:
+        for _ in range(steps_since_update):            
+            metrics = agent.gradient_update(buffer.sample(config.batch_size))
+            gradient_steps += 1
+            latest_loss = metrics.loss
+    steps_since_update = 0   
     env.close()
     summary = {
         "method": f"fixed_frequency_{update_interval}",
@@ -168,3 +198,4 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
+

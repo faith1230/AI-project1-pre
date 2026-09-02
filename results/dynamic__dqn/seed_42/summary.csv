@@ -1,0 +1,2 @@
+method,seed,total_env_steps,completed_episodes,gradient_steps,greedy_actions,exploratory_actions,condition_triggers,condition_trigger_rate_among_greedy,final_epsilon,device,env_id,experiment_name,replay_capacity,batch_size,learning_starts,hidden_dim,gamma,learning_rate,gradient_clip_norm,target_sync_interval,epsilon_start,epsilon_end,epsilon_decay_steps
+dynamic_condition,42,100000,598,99001,74508,25492,9712,0.13034841896172222,0.0050000000000000044,cuda,MountainCar-v0,dynamic__dqn,50000,64,1000,64,0.99,0.001,10.0,100,1.0,0.005,50000
