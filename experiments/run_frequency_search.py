@@ -19,7 +19,7 @@ def main() -> None:
         "--seeds",
         type=int,
         nargs="+",
-        default=[42, 43, 44, 45, 46],
+        default=[9, 99, 999, 9999, 99999],
         help="List of training seeds (e.g. --seeds 42 43 44 45 46)",
     )
     parser.add_argument(
