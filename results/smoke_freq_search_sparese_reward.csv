@@ -1,0 +1,5 @@
+method,n_seeds,mean_return_mean,mean_return_std,mean_return_ci95_low,mean_return_ci95_high,success_rate_mean,success_rate_std,success_rate_ci95_low,success_rate_ci95_high,mean_episode_length_mean,mean_episode_length_std,mean_episode_length_ci95_low,mean_episode_length_ci95_high
+dynamic_condition,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,200.0,0.0,200.0,200.0
+fixed_freq_2,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,200.0,0.0,200.0,200.0
+fixed_freq_4,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,200.0,0.0,200.0,200.0
+fixed_freq_8,1,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,200.0,0.0,200.0,200.0

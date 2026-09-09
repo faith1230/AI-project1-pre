@@ -18,10 +18,13 @@ def save_rows(path: Path, rows: list[dict]) -> None:
 
 
 def evaluate_checkpoint(
-    checkpoint_path: Path, episodes: int, evaluation_seed: int
+    checkpoint_path: Path,
+    episodes: int,
+    evaluation_seed: int,
+    sparse_reward: bool = True,
 ) -> tuple[list[dict], dict]:
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = make_env("MountainCar-v0", evaluation_seed)
+    env = make_env("MountainCar-v0", evaluation_seed, sparse_reward=sparse_reward)
     metadata = describe_env(env)
     agent = load_agent(
         checkpoint_path,
@@ -80,12 +83,27 @@ def main() -> None:
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--episodes", type=int, default=100)
     parser.add_argument("--evaluation-seed", type=int, default=10_000)
+    parser.add_argument(
+        "--sparse-reward",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Whether to use sparse goal reward (default: True)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Custom directory to save evaluation results (defaults to <checkpoint_dir>/evaluation)",
+    )
     args = parser.parse_args()
 
     rows, summary = evaluate_checkpoint(
-        args.checkpoint, args.episodes, args.evaluation_seed
+        args.checkpoint,
+        args.episodes,
+        args.evaluation_seed,
+        sparse_reward=args.sparse_reward,
     )
-    output_dir = args.checkpoint.parent / "evaluation"
+    output_dir = args.output_dir or (args.checkpoint.parent / "evaluation")
     save_rows(output_dir / "evaluation_episodes.csv", rows)
     save_rows(output_dir / "evaluation_summary.csv", [summary])
     print("Evaluation completed")

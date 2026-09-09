@@ -43,7 +43,7 @@ def save_rows(path: Path, rows: list[dict]) -> None:
 def train_dynamic_dqn(config: BaseConfig) -> tuple[list[dict], dict,DQNAgent]:
     set_global_seed(config.seed)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = make_env(config.env_id, config.seed)
+    env = make_env(config.env_id, config.seed, sparse_reward=config.sparse_reward)
     metadata = describe_env(env)
     agent = DQNAgent(
         state_dim=metadata["state_dim"],
@@ -173,6 +173,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--total-env-steps", type=int, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--name", type=str, default=None)
+    parser.add_argument(
+        "--sparse-reward",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Whether to use sparse goal reward (0 everywhere, +1 at goal)",
+    )
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        default=None,
+        help="Custom directory to save results (defaults to results/<name>/seed_<seed>)",
+    )
     return parser.parse_args()
 
 
@@ -185,10 +197,16 @@ def main() -> None:
         config = replace(config, seed=args.seed)
     if args.name is not None:
         config = replace(config, experiment_name=args.name)
+    if args.sparse_reward is not None:
+        config = replace(config, sparse_reward=args.sparse_reward)
 
     episode_rows, summary,agent = train_dynamic_dqn(config)
     experiment_name = args.name or "dynamic_condition"
-    output_dir = Path("results") / experiment_name / f"seed_{config.seed}"
+    output_dir = (
+        args.output_dir
+        if args.output_dir is not None
+        else Path("results") / experiment_name / f"seed_{config.seed}"
+    )
     save_rows(output_dir / "episodes.csv", episode_rows)
     save_rows(output_dir / "summary.csv", [summary])
     save_checkpoint(output_dir / "checkpoint.pt", agent, config, summary)

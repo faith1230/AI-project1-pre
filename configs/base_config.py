@@ -21,3 +21,4 @@ class BaseConfig:
     epsilon_start: float = 1.0
     epsilon_end: float = 0.005
     epsilon_decay_steps: int = 50_000
+    sparse_reward: bool = True

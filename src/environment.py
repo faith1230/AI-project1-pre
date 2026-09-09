@@ -1,8 +1,30 @@
 import gymnasium as gym
 
 
-def make_env(env_id: str, seed: int):
+class GoalRewardWrapper(gym.Wrapper):
+    """
+    Reward wrapper modifying the environment reward:
+    - Normal transition: 0.0
+    - Reaching the goal: +1.0
+    """
+
+    def step(self, action):
+        state, reward, terminated, truncated, info = self.env.step(action)
+        goal_reached = bool(
+            terminated
+            or (
+                hasattr(self.env.unwrapped, "goal_position")
+                and state[0] >= self.env.unwrapped.goal_position
+            )
+        )
+        custom_reward = 1.0 if goal_reached else 0.0
+        return state, custom_reward, terminated, truncated, info
+
+
+def make_env(env_id: str, seed: int, sparse_reward: bool = True):
     env = gym.make(env_id)
+    if sparse_reward:
+        env = GoalRewardWrapper(env)
     env.reset(seed=seed)
     env.action_space.seed(seed)
     return env

@@ -48,17 +48,30 @@ def main() -> None:
         help="Starting seed for deterministic evaluation (default: 10000)",
     )
     parser.add_argument(
+        "--results-dir",
+        type=Path,
+        default=Path("results"),
+        help="Root directory to store all experiment results (default: results)",
+    )
+    parser.add_argument(
         "--output",
         type=Path,
-        default=Path("results/frequency_search_comparison.csv"),
-        help="Output path for final comparison CSV",
+        default=None,
+        help="Output path for final comparison CSV (defaults to <results-dir>/frequency_search_comparison.csv)",
     )
     parser.add_argument(
         "--force-rerun",
         action="store_true",
         help="Force rerun even if checkpoint/evaluation already exists",
     )
+    parser.add_argument(
+        "--sparse-reward",
+        action=argparse.BooleanOptionalAction,
+        default=None,
+        help="Whether to use sparse goal reward (0 everywhere, +1 at goal)",
+    )
     args = parser.parse_args()
+    output_path = args.output or (args.results_dir / "frequency_search_comparison.csv")
 
     python_exe = sys.executable
 
@@ -87,7 +100,7 @@ def main() -> None:
     result_dirs: list[Path] = []
 
     for model_type, exp_name, extra_train_args in tasks:
-        exp_dir = Path("results") / exp_name
+        exp_dir = args.results_dir / exp_name
         result_dirs.append(exp_dir)
 
         for seed in args.seeds:
@@ -105,6 +118,10 @@ def main() -> None:
                 train_module = (
                     "src.train_dynamic" if model_type == "dynamic" else "src.train_fixed_frequency"
                 )
+                sparse_args = []
+                if args.sparse_reward is not None:
+                    sparse_args = ["--sparse-reward"] if args.sparse_reward else ["--no-sparse-reward"]
+
                 train_cmd = [
                     python_exe,
                     "-m",
@@ -115,13 +132,19 @@ def main() -> None:
                     str(seed),
                     "--name",
                     exp_name,
-                ] + extra_train_args
+                    "--output-dir",
+                    str(seed_dir),
+                ] + extra_train_args + sparse_args
                 run_command(train_cmd)
 
             # Step B: Evaluate
             if (not args.force_rerun) and eval_summary_file.exists():
                 print(f"[SKIP EVAL] Evaluation summary already exists: {eval_summary_file}")
             else:
+                sparse_args = []
+                if args.sparse_reward is not None:
+                    sparse_args = ["--sparse-reward"] if args.sparse_reward else ["--no-sparse-reward"]
+
                 eval_cmd = [
                     python_exe,
                     "-m",
@@ -132,7 +155,9 @@ def main() -> None:
                     str(args.eval_episodes),
                     "--evaluation-seed",
                     str(args.eval_seed),
-                ]
+                    "--output-dir",
+                    str(seed_dir / "evaluation"),
+                ] + sparse_args
                 run_command(eval_cmd)
 
     # Step C: Compare all evaluations
@@ -146,13 +171,13 @@ def main() -> None:
         "--result-dirs",
         *[str(d) for d in result_dirs],
         "--output",
-        str(args.output),
+        str(output_path),
     ]
     run_command(compare_cmd)
 
     print("\n" + "=" * 70)
     print(f" ALL EXPERIMENTS COMPLETED!")
-    print(f" Comparison table saved to: {args.output}")
+    print(f" Comparison table saved to: {output_path}")
     print("=" * 70)
 
 

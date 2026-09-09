@@ -18,6 +18,9 @@ def main() -> None:
         state_dim=metadata["state_dim"],
         n_actions=metadata["n_actions"],
         hidden_dim=config.hidden_dim,
+        learning_rate=config.learning_rate,
+        gamma=config.gamma,
+        gradient_clip_norm=config.gradient_clip_norm,
         seed=config.seed,
         device=device,
     )
