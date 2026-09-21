@@ -22,3 +22,13 @@ class BaseConfig:
     epsilon_end: float = 0.005
     epsilon_decay_steps: int = 50_000
     sparse_reward: bool = True
+
+    # 评估与贪婪策略配置
+    always_greedy_training: bool = False  # 训练时是否全程使用纯贪婪策略 (epsilon=0.0)
+    eval_interval: int = 10_000           # 每训练多少 steps 评估一次 (纯 greedy 策略)
+    eval_episodes: int = 10               # 每次评估的回合数
+    eval_seed: int = 10_000               # 评估基准随机种子
+
+    # WandB 跟踪配置
+    use_wandb: bool = False               # 是否启用 wandb.ai 实验跟踪
+    wandb_project: str = "MountainCar-DQN"# wandb 项目名

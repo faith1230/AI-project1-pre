@@ -6,6 +6,7 @@ import numpy as np
 import torch
 
 from src.checkpoint import load_agent
+from src.dqn_agent import DQNAgent
 from src.environment import describe_env, make_env
 
 
@@ -17,22 +18,13 @@ def save_rows(path: Path, rows: list[dict]) -> None:
         writer.writerows(rows)
 
 
-def evaluate_checkpoint(
-    checkpoint_path: Path,
-    episodes: int,
-    evaluation_seed: int,
-    sparse_reward: bool = True,
+def evaluate_agent(
+    agent: DQNAgent,
+    env,
+    episodes: int = 10,
+    evaluation_seed: int = 10_000,
 ) -> tuple[list[dict], dict]:
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    env = make_env("MountainCar-v0", evaluation_seed, sparse_reward=sparse_reward)
-    metadata = describe_env(env)
-    agent = load_agent(
-        checkpoint_path,
-        state_dim=metadata["state_dim"],
-        n_actions=metadata["n_actions"],
-        device=device,
-    )
-
+    """在线纯贪婪评测 (epsilon=0.0)"""
     rows = []
     for episode in range(episodes):
         state, _ = env.reset(seed=evaluation_seed + episode)
@@ -57,13 +49,11 @@ def evaluate_checkpoint(
             }
         )
 
-    env.close()
     returns = np.asarray([row["return"] for row in rows], dtype=float)
     lengths = np.asarray([row["length"] for row in rows], dtype=float)
     successes = np.asarray([row["success"] for row in rows], dtype=float)
     successful_lengths = lengths[successes == 1]
     summary = {
-        "checkpoint": str(checkpoint_path),
         "evaluation_episodes": episodes,
         "evaluation_seed_start": evaluation_seed,
         "mean_return": float(returns.mean()),
@@ -75,6 +65,27 @@ def evaluate_checkpoint(
             float(successful_lengths.mean()) if len(successful_lengths) else float("nan")
         ),
     }
+    return rows, summary
+
+
+def evaluate_checkpoint(
+    checkpoint_path: Path,
+    episodes: int,
+    evaluation_seed: int,
+    sparse_reward: bool = True,
+) -> tuple[list[dict], dict]:
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    env = make_env("MountainCar-v0", evaluation_seed, sparse_reward=sparse_reward)
+    metadata = describe_env(env)
+    agent = load_agent(
+        checkpoint_path,
+        state_dim=metadata["state_dim"],
+        n_actions=metadata["n_actions"],
+        device=device,
+    )
+    rows, summary = evaluate_agent(agent, env, episodes, evaluation_seed)
+    env.close()
+    summary["checkpoint"] = str(checkpoint_path)
     return rows, summary
 
 

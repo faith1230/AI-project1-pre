@@ -78,7 +78,7 @@ def plot_comparison_metrics(comparison_path: Path, output_dir: Path):
 
 
 def plot_training_curves(results_dir: Path, output_dir: Path, window: int = 10):
-    """Plot smoothed training curves across all methods and seeds."""
+    """Plot smoothed training curves across all methods and seeds with env_step as x-axis."""
     episode_files = list(results_dir.glob("*/seed_*/episodes.csv"))
     if not episode_files:
         print("No episode.csv files found for training curves.")
@@ -96,13 +96,12 @@ def plot_training_curves(results_dir: Path, output_dir: Path, window: int = 10):
         records.append(df)
 
     all_df = pd.concat(records, ignore_index=True)
-    if "episode" not in all_df.columns:
-        all_df["episode"] = all_df.groupby(["method", "seed"]).cumcount() + 1
+    x_col = "env_step" if "env_step" in all_df.columns else "episode"
 
     fig, ax = plt.subplots(figsize=(10, 6), dpi=300)
     sns.lineplot(
         data=all_df,
-        x="episode",
+        x=x_col,
         y="smoothed_return",
         hue="method",
         style="method",
@@ -111,16 +110,67 @@ def plot_training_curves(results_dir: Path, output_dir: Path, window: int = 10):
         linewidth=2.0,
         ax=ax,
     )
-    ax.set_title(f"Training Learning Curves (Smoothed Window = {window})", fontsize=14, fontweight="bold", pad=12)
-    ax.set_xlabel("Episode", fontsize=12, fontweight="bold")
+    x_label = "Environment Steps" if x_col == "env_step" else "Episode"
+    ax.set_title(f"Training Learning Curves vs {x_label} (Smoothed Window = {window})", fontsize=14, fontweight="bold", pad=12)
+    ax.set_xlabel(x_label, fontsize=12, fontweight="bold")
     ax.set_ylabel("Smoothed Return", fontsize=12, fontweight="bold")
     ax.legend(title="Method", frameon=True, loc="lower right")
     plt.tight_layout()
 
-    save_path = output_dir / "training_learning_curves.png"
+    save_path = output_dir / "training_learning_curves_steps.png"
     plt.savefig(save_path, bbox_inches="tight", dpi=300)
     plt.close()
     print(f"Saved: {save_path}")
+
+    # 同时绘制 Training vs Greedy Evaluation 曲线 (如果存在 eval_during_train.csv)
+    eval_files = list(results_dir.glob("*/seed_*/eval_during_train.csv"))
+    if eval_files:
+        eval_records = []
+        for ef in eval_files:
+            method = ef.parent.parent.name
+            seed = ef.parent.name
+            edf = pd.read_csv(ef)
+            edf["method"] = method
+            edf["seed"] = seed
+            eval_records.append(edf)
+        eval_all_df = pd.concat(eval_records, ignore_index=True)
+
+        fig, ax = plt.subplots(figsize=(11, 6), dpi=300)
+        # 1. 训练曲线 (细线/半透明)
+        sns.lineplot(
+            data=all_df,
+            x="env_step",
+            y="smoothed_return",
+            hue="method",
+            palette="tab10",
+            errorbar=None,
+            alpha=0.35,
+            linewidth=1.2,
+            linestyle="--",
+            ax=ax,
+        )
+        # 2. 评测曲线 (粗线 + 标记点)
+        sns.lineplot(
+            data=eval_all_df,
+            x="env_step",
+            y="mean_return",
+            hue="method",
+            palette="tab10",
+            errorbar=("ci", 95),
+            linewidth=2.5,
+            marker="o",
+            markersize=6,
+            ax=ax,
+        )
+        ax.set_title("Training Return (Dashed) vs Greedy Evaluation Return (Solid+Marker)", fontsize=14, fontweight="bold", pad=12)
+        ax.set_xlabel("Environment Steps", fontsize=12, fontweight="bold")
+        ax.set_ylabel("Return", fontsize=12, fontweight="bold")
+        ax.legend(title="Method (Solid=Eval, Dashed=Train)", frameon=True, loc="lower right")
+        plt.tight_layout()
+        eval_save_path = output_dir / "train_vs_greedy_eval_curves_steps.png"
+        plt.savefig(eval_save_path, bbox_inches="tight", dpi=300)
+        plt.close()
+        print(f"Saved: {eval_save_path}")
 
 
 def plot_seed_distributions(results_dir: Path, output_dir: Path):
