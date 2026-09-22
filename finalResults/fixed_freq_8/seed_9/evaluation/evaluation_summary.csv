@@ -1,0 +1,2 @@
+evaluation_episodes,evaluation_seed_start,mean_return,std_return,median_return,success_rate,mean_episode_length,mean_length_when_successful,checkpoint
+100,10000,0.83,0.3775251680686369,1.0,0.83,150.98,140.93975903614458,finalResults\fixed_freq_8\seed_9\checkpoint.pt

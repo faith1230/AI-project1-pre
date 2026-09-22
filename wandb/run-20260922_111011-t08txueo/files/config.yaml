@@ -1,0 +1,108 @@
+_wandb:
+    value:
+        cli_version: 0.30.0
+        e:
+            zpj39ftuakmigb6e83ma83bewm31lbny:
+                args:
+                    - --total-env-steps
+                    - "100000"
+                    - --seed
+                    - "9"
+                    - --name
+                    - dynamic_condition
+                    - --output-dir
+                    - SparsefinalResults\dynamic_condition\seed_9
+                    - --sparse-reward
+                cpu_count: 20
+                cpu_count_logical: 20
+                disk:
+                    /:
+                        total: "506654093312"
+                        used: "108453052416"
+                email: 2574762502@qq.com
+                executable: C:\Users\S536838\Git-projects\RLenv\Scripts\python.exe
+                host: p080info011062
+                memory:
+                    total: "33775415296"
+                os: Windows-11-10.0.26100-SP0
+                program: -m src.train_dynamic
+                python: CPython 3.12.13
+                root: C:\Users\S536838\Git-projects\AI-project1-pre
+                startedAt: "2026-09-22T09:10:11.282927Z"
+                writerId: zpj39ftuakmigb6e83ma83bewm31lbny
+        m:
+            - "1": env_step
+              "6":
+                - 3
+              "7": []
+            - "2": train/*
+              "5": 1
+              "6":
+                - 1
+              "7": []
+            - "2": eval/*
+              "5": 1
+              "6":
+                - 1
+              "7": []
+        python_version: 3.12.13
+        t:
+            "1":
+                - 1
+            "2":
+                - 1
+            "3":
+                - 2
+                - 7
+                - 13
+                - 16
+            "4": 3.12.13
+            "5": 0.30.0
+            "8":
+                - 3
+            "12": 0.30.0
+            "13": windows-amd64
+always_greedy_training:
+    value: false
+batch_size:
+    value: 64
+env_id:
+    value: MountainCar-v0
+epsilon_decay_steps:
+    value: 50000
+epsilon_end:
+    value: 0.005
+epsilon_start:
+    value: 1
+eval_episodes:
+    value: 10
+eval_interval:
+    value: 10000
+eval_seed:
+    value: 10000
+experiment_name:
+    value: dynamic_condition
+gamma:
+    value: 0.99
+gradient_clip_norm:
+    value: 10
+hidden_dim:
+    value: 64
+learning_rate:
+    value: 0.001
+learning_starts:
+    value: 1000
+replay_capacity:
+    value: 50000
+seed:
+    value: 9
+sparse_reward:
+    value: true
+target_sync_interval:
+    value: 100
+total_env_steps:
+    value: 100000
+use_wandb:
+    value: true
+wandb_project:
+    value: MountainCar-DQN

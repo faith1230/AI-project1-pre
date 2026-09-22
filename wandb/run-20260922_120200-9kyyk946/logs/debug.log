@@ -1,0 +1,24 @@
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_setup.py:_flush():81] Current SDK version is 0.30.0
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_setup.py:_flush():81] Configure stats pid to 5676
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_setup.py:_flush():81] Loading settings from environment variables
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:setup_run_log_directory():739] Logging user logs to C:\Users\S536838\Git-projects\AI-project1-pre\wandb\run-20260922_120200-9kyyk946\logs\debug.log
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:setup_run_log_directory():740] Logging internal logs to C:\Users\S536838\Git-projects\AI-project1-pre\wandb\run-20260922_120200-9kyyk946\logs\debug-internal.log
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:init():783] calling init triggers
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:init():788] wandb.init called with sweep_config: {}
+config: {'env_id': 'MountainCar-v0', 'seed': 9, 'experiment_name': 'fixed_freq_16', 'total_env_steps': 100000, 'replay_capacity': 50000, 'batch_size': 64, 'learning_starts': 1000, 'hidden_dim': 64, 'gamma': 0.99, 'learning_rate': 0.001, 'gradient_clip_norm': 10.0, 'target_sync_interval': 100, 'epsilon_start': 1.0, 'epsilon_end': 0.005, 'epsilon_decay_steps': 50000, 'sparse_reward': False, 'always_greedy_training': False, 'eval_interval': 10000, 'eval_episodes': 10, 'eval_seed': 10000, 'use_wandb': True, 'wandb_project': 'MountainCar-DQN', '_wandb': {}}
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:init():831] starting backend
+2026-09-22 12:02:00,231 INFO    MainThread:5676 [wandb_init.py:init():846] sending inform_init request
+2026-09-22 12:02:00,242 INFO    MainThread:5676 [wandb_init.py:init():851] backend started and connected
+2026-09-22 12:02:00,251 INFO    MainThread:5676 [wandb_init.py:init():921] updated telemetry
+2026-09-22 12:02:00,256 INFO    MainThread:5676 [wandb_init.py:init():944] communicating run to backend with 90.0 second timeout
+2026-09-22 12:02:00,792 INFO    MainThread:5676 [wandb_init.py:init():981] starting run threads in backend
+2026-09-22 12:02:00,827 INFO    MainThread:5676 [wandb_run.py:_console_start():2531] atexit reg
+2026-09-22 12:02:00,828 INFO    MainThread:5676 [wandb_run.py:_redirect():2381] redirect: wrap_raw
+2026-09-22 12:02:00,828 INFO    MainThread:5676 [wandb_run.py:_redirect():2450] Wrapping output streams.
+2026-09-22 12:02:00,828 INFO    MainThread:5676 [wandb_run.py:_redirect():2473] Redirects installed.
+2026-09-22 12:02:00,830 INFO    MainThread:5676 [wandb_init.py:init():1019] run started, returning control to user process
+2026-09-22 12:04:03,884 INFO    MainThread:5676 [wandb_run.py:_finish():2303] finishing run 2574762502-julius-maximilians-universit-t-w-rzburg/MountainCar-DQN/9kyyk946
+2026-09-22 12:04:03,886 INFO    MainThread:5676 [wandb_run.py:_atexit_cleanup():2498] got exitcode: 0
+2026-09-22 12:04:03,886 INFO    MainThread:5676 [wandb_run.py:_restore():2480] restore
+2026-09-22 12:04:03,886 INFO    MainThread:5676 [wandb_run.py:_restore():2486] restore done
+2026-09-22 12:04:05,788 INFO    MainThread:5676 [wandb_run.py:_footer_sync_info():3901] logging synced files

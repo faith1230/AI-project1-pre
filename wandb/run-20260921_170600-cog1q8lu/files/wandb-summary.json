@@ -1,0 +1,1 @@
+{"env_step":100000,"_runtime":132,"_step":641,"train/episode_return":1,"train/episode_length":115,"train/epsilon":0.0050000000000000044,"eval/success_rate":1,"train/loss":4.2958494304912165e-05,"_timestamp":1.7900032941006334e+09,"_wandb":{"runtime":132},"eval/mean_return":1,"eval/mean_episode_length":153.9}

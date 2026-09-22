@@ -1,0 +1,32 @@
+{
+  "os":  "Windows-11-10.0.26100-SP0",
+  "python":  "CPython 3.12.13",
+  "startedAt":  "2026-09-22T09:24:35.873933Z",
+  "args":  [
+    "--total-env-steps",
+    "100000",
+    "--seed",
+    "9999",
+    "--name",
+    "dynamic_condition",
+    "--output-dir",
+    "finalResults2noS\\dynamic_condition\\seed_9999"
+  ],
+  "program":  "-m src.train_dynamic",
+  "email":  "2574762502@qq.com",
+  "root":  "C:\\Users\\S536838\\Git-projects\\AI-project1-pre",
+  "host":  "p080info011062",
+  "executable":  "C:\\Users\\S536838\\Git-projects\\RLenv\\Scripts\\python.exe",
+  "cpu_count":  20,
+  "cpu_count_logical":  20,
+  "disk":  {
+    "/":  {
+      "total":  "506654093312",
+      "used":  "108497956864"
+    }
+  },
+  "memory":  {
+    "total":  "33775415296"
+  },
+  "writerId":  "o8u6rs26sy4evryf40rqufvd21c5pq63"
+}

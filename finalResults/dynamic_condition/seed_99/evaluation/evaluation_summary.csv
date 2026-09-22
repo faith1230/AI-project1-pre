@@ -1,0 +1,2 @@
+evaluation_episodes,evaluation_seed_start,mean_return,std_return,median_return,success_rate,mean_episode_length,mean_length_when_successful,checkpoint
+100,10000,0.99,0.09999999999999999,1.0,0.99,124.59,123.82828282828282,finalResults\dynamic_condition\seed_99\checkpoint.pt

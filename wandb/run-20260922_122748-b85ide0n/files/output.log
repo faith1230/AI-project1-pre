@@ -1,0 +1,21 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 318, in <module>
+    main()
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 294, in main
+    episode_rows, eval_rows, summary, agent = train_dynamic_dqn(config)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 127, in train_dynamic_dqn
+    metrics = agent.gradient_update(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\dqn_agent.py", line 133, in gradient_update
+    loss.backward()
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\_tensor.py", line 623, in backward
+    torch.autograd.backward(
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\autograd\__init__.py", line 395, in backward
+    _engine_run_backward(
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\autograd\graph.py", line 1072, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

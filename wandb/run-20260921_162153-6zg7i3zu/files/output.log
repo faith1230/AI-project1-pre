@@ -1,0 +1,42 @@
+Traceback (most recent call last):
+  File "<frozen runpy>", line 198, in _run_module_as_main
+  File "<frozen runpy>", line 88, in _run_code
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 318, in <module>
+    main()
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 294, in main
+    episode_rows, eval_rows, summary, agent = train_dynamic_dqn(config)
+                                              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\train_dynamic.py", line 127, in train_dynamic_dqn
+    metrics = agent.gradient_update(
+              ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\dqn_agent.py", line 126, in gradient_update
+    predicted_q = self.online_net(states).gather(1, actions).squeeze(1)
+                  ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\AI-project1-pre\src\dqn_agent.py", line 24, in forward
+    return self.model(states)
+           ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\container.py", line 259, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1783, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\module.py", line 1794, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\S536838\Git-projects\RLenv\Lib\site-packages\torch\nn\modules\linear.py", line 134, in forward
+    return F.linear(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt

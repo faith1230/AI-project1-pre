@@ -1,0 +1,34 @@
+{
+  "os":  "Windows-11-10.0.26100-SP0",
+  "python":  "CPython 3.12.13",
+  "startedAt":  "2026-09-22T09:31:05.697284Z",
+  "args":  [
+    "--total-env-steps",
+    "100000",
+    "--seed",
+    "99",
+    "--name",
+    "fixed_freq_1",
+    "--output-dir",
+    "finalResults2noS\\fixed_freq_1\\seed_99",
+    "--interval",
+    "1"
+  ],
+  "program":  "-m src.train_fixed_frequency",
+  "email":  "2574762502@qq.com",
+  "root":  "C:\\Users\\S536838\\Git-projects\\AI-project1-pre",
+  "host":  "p080info011062",
+  "executable":  "C:\\Users\\S536838\\Git-projects\\RLenv\\Scripts\\python.exe",
+  "cpu_count":  20,
+  "cpu_count_logical":  20,
+  "disk":  {
+    "/":  {
+      "total":  "506654093312",
+      "used":  "108512018432"
+    }
+  },
+  "memory":  {
+    "total":  "33775415296"
+  },
+  "writerId":  "uzq8709iobcp9vxklint5o55z8huopn1"
+}
